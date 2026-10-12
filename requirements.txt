@@ -1,0 +1,14 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart
+pydantic>=2
+pyjwt
+numpy
+pymupdf
+python-pptx
+python-docx
+pillow
+# optional (features degrade gracefully if missing)
+anthropic          # LLM answers, question generation, VLM diagram captions
+pytesseract        # OCR for images / scanned PDFs (needs tesseract binary)
+faster-whisper     # video/audio transcription (needs ffmpeg)

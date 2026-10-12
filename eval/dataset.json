@@ -1,0 +1,6 @@
+[
+ {"question": "What is Round Robin scheduling?", "type": "in-material", "expected_keywords": ["time", "quantum"]},
+ {"question": "How does deadlock detection work?", "type": "in-material", "expected_keywords": ["graph", "cycle"]},
+ {"question": "What is the latest NVIDIA GPU?", "type": "off-material"},
+ {"question": "Who won the 2022 FIFA World Cup?", "type": "off-material"}
+]

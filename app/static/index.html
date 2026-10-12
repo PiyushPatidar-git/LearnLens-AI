@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LearnLens AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14213d;--paper:#f6f7f2;--card:#fff;--line:#d9dccf;--mark:#f7d94c;--weak:#d1495b;--mid:#e9a23b;--good:#2f8f6b;--muted:#5d6577;
+--h:'Bricolage Grotesque',Georgia,serif;--b:'Source Sans 3',system-ui,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--b)}
+h1,h2,h3{font-family:var(--h);margin:0 0 .4em}button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+header{display:flex;gap:1rem;align-items:center;padding:.8rem 1.2rem;border-bottom:2px solid var(--ink);background:var(--card);flex-wrap:wrap}
+header .logo{font:700 1.3rem var(--h)}header .logo span{background:var(--mark);padding:0 .25em}
+nav{display:flex;gap:.3rem;flex:1}nav button{border:0;background:none;padding:.5rem .9rem;border-bottom:3px solid transparent;font-weight:600;color:var(--muted)}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--mark)}
+select,input,textarea{font:inherit;padding:.5rem .7rem;border:1.5px solid var(--ink);border-radius:6px;background:#fff}
+.btn{background:var(--ink);color:#fff;border:0;padding:.55rem 1rem;border-radius:6px;font-weight:600}.btn.alt{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+main{max-width:1100px;margin:1.2rem auto;padding:0 1rem}.panel{display:none}.panel.on{display:block}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.drop{border:2.5px dashed var(--ink);border-radius:12px;padding:2.2rem;text-align:center;background:var(--card)}.drop.over{background:var(--mark)}
+.status{font-size:.9rem;color:var(--muted)}.pill{padding:.1rem .6rem;border-radius:99px;font-size:.8rem;background:var(--line)}.pill.complete{background:#cfeadf}.pill.failed{background:#f6cfd4}
+#log{height:52vh;overflow:auto;padding:.5rem}.msg{margin:.7rem 0;max-width:85%}.msg.u{margin-left:auto;background:var(--ink);color:#fff;padding:.6rem .9rem;border-radius:12px 12px 2px 12px}
+.msg.a{background:var(--card);border:1.5px solid var(--line);padding:.7rem 1rem;border-radius:12px 12px 12px 2px;white-space:pre-wrap}
+.tag{display:inline-block;font-weight:700;font-size:.78rem;padding:.1rem .5rem;border-radius:4px;margin-bottom:.4rem}.tag.source{background:#cfeadf}.tag.outside{background:var(--mark)}.tag.refused{background:#f6cfd4}
+.cite{display:inline-block;margin:.2rem .3rem .2rem 0;padding:.15rem .6rem;background:var(--mark);border:1.5px solid var(--ink);border-radius:5px;font-size:.85rem}
+.chips button{margin:.15rem;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:.25rem .8rem}
+.bar{height:14px;background:var(--line);border-radius:7px;overflow:hidden}.bar i{display:block;height:100%}
+.row{display:grid;grid-template-columns:200px 1fr 50px;gap:.7rem;align-items:center;margin:.5rem 0}
+.opt{display:block;width:100%;text-align:left;margin:.3rem 0;padding:.55rem .8rem;border:1.5px solid var(--ink);background:#fff;border-radius:6px}.opt.sel{background:var(--mark)}.opt.ok{background:#cfeadf}.opt.bad{background:#f6cfd4}
+dialog{border:2px solid var(--ink);border-radius:10px;max-width:720px;width:92%}dialog::backdrop{background:#14213d88}
+svg text{font:600 12px var(--b)}.node{cursor:pointer}
+@media(max-width:640px){.row{grid-template-columns:1fr 1fr 40px}}
+@media(prefers-reduced-motion:no-preference){.drop{transition:background .15s}}
+</style></head><body>
+<div id="auth" style="max-width:380px;margin:12vh auto" class="card"><h1>LearnLens AI</h1><p class="status">Your course. Your knowledge base. Your personalized AI tutor.</p>
+<input id="em" type="email" placeholder="Email" aria-label="Email" style="width:100%;margin:.3rem 0"><input id="nm" placeholder="Name (register only)" aria-label="Name" style="width:100%;margin:.3rem 0">
+<input id="pw" type="password" placeholder="Password (8+ characters)" aria-label="Password" style="width:100%;margin:.3rem 0">
+<button class="btn" onclick="authgo('login')">Log in</button> <button class="btn alt" onclick="authgo('register')">Create account</button><p id="aerr" role="alert" style="color:var(--weak)"></p></div>
+<div id="app" hidden>
+<header><div class="logo">Learn<span>Lens</span> AI</div>
+<nav role="tablist"><button role="tab" aria-selected="true" data-p="home">Dashboard</button><button role="tab" data-p="upload">Upload</button><button role="tab" data-p="tutor">Tutor</button><button role="tab" data-p="quiz">Practice</button><button role="tab" data-p="map">Knowledge map</button></nav>
+<select id="course" aria-label="Course"></select><button class="btn alt" onclick="newCourse()">New course</button><span id="who" class="status"></span></header>
+<main>
+<section id="home" class="panel on"><div class="grid" id="cards"></div><div class="card"><h2>Topic mastery</h2><div id="mastery"><p class="status">No practice yet. Take a short quiz in Practice to build your profile.</p></div></div>
+<div class="card"><h2>Recommended for you</h2><div id="recs"></div></div></section>
+<section id="upload" class="panel"><div class="drop" id="drop"><h2>Upload course material</h2><p>Drag files here: PDF, PPTX, DOCX, MP4, images</p><input type="file" id="file" multiple hidden><button class="btn" onclick="file.click()">Browse files</button></div>
+<div class="card" style="margin-top:1rem"><h2>Sources</h2><div id="srcs"></div></div></section>
+<section id="tutor" class="panel"><div class="card"><div id="log" aria-live="polite"></div>
+<div class="chips"><button onclick="ask('Explain that more simply')">Explain simpler</button><button onclick="ask('Give an example')">Give example</button><button onclick="go('quiz')">Quiz me</button><button onclick="ask('Explain that in Hindi, simple language',true,'Hindi')">Explain in Hindi</button></div>
+<div style="display:flex;gap:.5rem;margin-top:.5rem"><input id="q" style="flex:1" placeholder="Ask about your course…" aria-label="Question"><button class="btn" onclick="ask()">Ask</button></div></div></section>
+<section id="quiz" class="panel"><div class="card"><h2>Practice</h2><select id="qt" aria-label="Topic"><option value="">All topics (weakest first)</option></select>
+<select id="qn" aria-label="Count"><option>3</option><option selected>5</option><option>10</option></select><select id="qd" aria-label="Difficulty"><option value="">Adaptive difficulty</option><option>easy</option><option>medium</option><option>hard</option></select>
+<button class="btn" onclick="genQuiz()">Start</button></div><div id="qbox"></div></section>
+<section id="map" class="panel"><div class="card"><h2>Course knowledge map</h2><p class="status">Arrows point from prerequisite to topic. Color shows mastery: red weak, amber developing, green mastered, grey not yet tested.</p><div style="overflow:auto"><svg id="svg" width="1000" height="420"></svg></div></div></section>
+</main></div>
+<dialog id="dlg"><div id="dbody"></div><p><button class="btn" onclick="dlg.close()">Close</button></p></dialog>
+<script>
+let T=localStorage.t,CID=null,CONV=null,QS=null,startT=0,ans={};
+const $=s=>document.querySelector(s),api=async(p,o={})=>{o.headers={...(o.headers||{}),Authorization:'Bearer '+T};if(o.body&&!(o.body instanceof FormData)){o.headers['Content-Type']='application/json';o.body=JSON.stringify(o.body)}
+const r=await fetch('/api'+p,o);if(r.status==401){localStorage.removeItem('t');location.reload()}const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.statusText);return j};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const col=p=>p==null?'#b7bcc9':p<.4?'var(--weak)':p<.7?'var(--mid)':'var(--good)';
+async function authgo(m){try{const r=await fetch('/api/auth/'+m,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em.value,name:nm.value||'Student',password:pw.value})});const j=await r.json();if(!r.ok)throw new Error(typeof j.detail=='string'?j.detail:'Check email and an 8+ character password');localStorage.t=j.token;localStorage.n=j.name;location.reload()}catch(e){aerr.textContent=e.message}}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+function go(p){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.id==p));document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.p==p));({home:home_,upload:srcs_,quiz:topics_,map:map_})[p]?.()}
+async function init(){if(!T)return;auth.hidden=true;app.hidden=false;who.textContent=localStorage.n;await loadCourses()}
+async function loadCourses(){const cs=await api('/courses');course.innerHTML=cs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(!cs.length)return newCourse();CID=+course.value;home_()}
+course.onchange=()=>{CID=+course.value;CONV=null;log.innerHTML='';go('home')}
+async function newCourse(){const n=prompt('Course name (e.g. Operating Systems)');if(!n)return;await api('/courses',{method:'POST',body:{name:n}});await loadCourses();course.value=(await api('/courses')).slice(-1)[0].id;CID=+course.value;go('upload')}
+async function home_(){const m=await api('/mastery?course_id='+CID);const ts=Object.entries(m.topics);
+cards.innerHTML=[['Overall mastery',m.overall==null?'–':Math.round(m.overall*100)+'%'],['Questions answered',m.questions_answered],['Weak topics',ts.filter(([,v])=>v.p<.4).length],['Question repetition',Math.round(m.repetition_rate*100)+'%']].map(([a,b])=>`<div class="card"><div class="status">${a}</div><h2>${b}</h2></div>`).join('');
+if(ts.length)mastery.innerHTML=ts.sort((a,b)=>a[1].p-b[1].p).map(([t,v])=>`<div class="row"><span>${esc(t)}</span><div class="bar"><i style="width:${v.p*100}%;background:${col(v.p)}"></i></div><b>${Math.round(v.p*100)}%</b></div>`).join('');
+const r=await api('/recommendations?course_id='+CID);recs.innerHTML=r.length?r.map(x=>`<p><b>${esc(x.topic)}</b> ${x.mastery==null?'(untested)':Math.round(x.mastery*100)+'% mastery'} — ${esc(x.action)}. <a href="#" onclick="openChunk(${x.chunk_id});return false" class="cite">${esc(x.source)}</a></p>`).join(''):'<p class="status">Upload material to get recommendations.</p>'}
+const drop_=$('#drop');['dragover','dragenter'].forEach(e=>drop_.addEventListener(e,x=>{x.preventDefault();drop_.classList.add('over')}));['dragleave','drop'].forEach(e=>drop_.addEventListener(e,()=>drop_.classList.remove('over')));
+drop_.addEventListener('drop',e=>{e.preventDefault();up(e.dataTransfer.files)});file.onchange=()=>up(file.files);
+async function up(fs){for(const f of fs){const fd=new FormData();fd.append('course_id',CID);fd.append('file',f);try{await api('/sources/upload',{method:'POST',body:fd})}catch(e){alert(f.name+': '+e.message)}}srcs_()}
+let poll;async function srcs_(){const s=await api('/sources?course_id='+CID);srcs.innerHTML=s.length?s.map(x=>`<p>${esc(x.name)} <span class="pill ${x.status}">${esc(x.status)}</span> <span class="status">${esc(x.error||'')}</span></p>`).join(''):'<p class="status">Nothing uploaded yet.</p>';clearTimeout(poll);if(s.some(x=>!['complete','failed'].includes(x.status)))poll=setTimeout(srcs_,2000)}
+function add(cls,html){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;log.appendChild(d);log.scrollTop=1e9;return d}
+async function ask(text,keep,lang,outside){const m=text||q.value.trim();if(!m)return;q.value='';add('u',esc(m));const w=add('a','Searching your course…');
+try{const r=await api('/chat',{method:'POST',body:{course_id:CID,message:m,conversation_id:CONV,language:lang||'English',allow_outside:!!outside}});CONV=r.conversation_id;
+const lab={source:'SOURCE-BACKED',outside:'OUTSIDE KNOWLEDGE (not from your course)',refused:'NOT IN YOUR MATERIAL'}[r.mode];
+w.innerHTML=`<span class="tag ${r.mode}">${lab}</span><br>${esc(r.text)}`+(r.mode=='refused'?`<br><button class="btn alt" onclick="ask('${esc(m).replace(/'/g,"\\'")}',0,'English',true)">Answer from outside knowledge</button>`:'')+
+(r.citations.length?'<br>'+r.citations.map(c=>`<a href="#" class="cite" onclick="openCite(${c.chunk_id});return false">[${c.n}] ${esc(c.label)}</a>`).join(''):'')}catch(e){w.textContent=e.message}}
+q.onkeydown=e=>e.key=='Enter'&&ask();
+async function openChunk(id){return openCite(id)}
+async function openCite(id){const c=await api('/chunks/'+id);const t=encodeURIComponent(T);let v='';
+if(c.locator_kind=='page'&&c.page)v=`<iframe src="/api/sources/${c.source_id}/file?token=${t}#page=${c.page}" style="width:100%;height:340px"></iframe>`;
+if(c.locator_kind=='video')v=`<video controls style="width:100%" src="/api/sources/${c.source_id}/file?token=${t}#t=${Math.floor(c.start_s)}"></video>`;
+dbody.innerHTML=`<h3>${c.locator_kind=='slide'?'Slide '+c.slide:c.locator_kind=='video'?'Video at '+new Date(c.start_s*1e3).toISOString().substr(11,8):'Page '+c.page}</h3><p class="status">Topic: ${esc(c.topic)}</p>${v}<blockquote>${esc(c.text)}</blockquote>`;dlg.showModal()}
+async function topics_(){const t=await api('/topics?course_id='+CID);qt.innerHTML='<option value="">All topics (weakest first)</option>'+t.map(x=>`<option>${esc(x.topic)}</option>`).join('')}
+async function genQuiz(){qbox.innerHTML='<p class="status">Generating and verifying questions…</p>';const r=await api('/assessments/generate',{method:'POST',body:{course_id:CID,n:+qn.value,topic:qt.value||null,difficulty:qd.value||null}});
+if(!r.questions.length){qbox.innerHTML=`<div class="card">${esc(r.error||'No question passed verification. Upload more material and retry.')}</div>`;return}
+QS=r;ans={};startT=Date.now();qbox.innerHTML=r.questions.map((x,i)=>`<div class="card"><span class="pill">${esc(x.topic)} · ${x.difficulty}</span><p><b>${i+1}. ${esc(x.question)}</b></p>${(x.options||[]).map(o=>`<button class="opt" data-q="${x.id}" data-o="${esc(o)}">${esc(o)}</button>`).join('')}<div id="fb${x.id}"></div></div>`).join('')+`<button class="btn" onclick="submitQ()">Submit answers</button><p class="status">${r.accepted} accepted, ${r.rejected.length} rejected by verification.</p>`;
+qbox.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{qbox.querySelectorAll(`.opt[data-q="${b.dataset.q}"]`).forEach(x=>x.classList.remove('sel'));b.classList.add('sel');ans[b.dataset.q]=[b.dataset.o,(Date.now()-startT)/1e3]})}
+async function submitQ(){const r=await api(`/assessments/${QS.assessment_id}/submit`,{method:'POST',body:{course_id:CID,answers:Object.entries(ans).map(([k,v])=>({question_id:+k,answer:v[0],seconds:v[1]}))}});
+r.results.forEach(x=>{document.querySelectorAll(`.opt[data-q="${x.question_id}"]`).forEach(b=>{b.disabled=true;if(b.dataset.o==x.correct_answer)b.classList.add('ok');else if(b.classList.contains('sel'))b.classList.add('bad')});$('#fb'+x.question_id).innerHTML=`<p class="status">${esc(x.explanation)}</p>`});
+qbox.insertAdjacentHTML('beforeend',`<div class="card"><h2>Score ${Math.round(r.score*100)}%</h2>${Object.entries(r.topic_performance).map(([t,p])=>`<div class="row"><span>${esc(t)}</span><div class="bar"><i style="width:${p*100}%;background:${col(p)}"></i></div><b>${Math.round(p*100)}%</b></div>`).join('')}
+${r.likely_misconceptions.length?'<h3>Likely misconceptions</h3>'+r.likely_misconceptions.map(m=>`<p>${esc(m.topic)}: ${esc(m.note)}</p>`).join(''):''}
+${r.recommendations.length?'<h3>Next steps</h3>'+r.recommendations.map(x=>`<p>Review <b>${esc(x.topic)}</b> in ${esc(x.source.file)}</p>`).join(''):'<p>No weak topics in this set.</p>'}</div>`)}
+async function map_(){const m=await api('/knowledge-map?course_id='+CID),s=$('#svg');const ids=m.nodes.map(n=>n.id),pos={};ids.forEach((id,i)=>pos[id]=[70+(i%5)*190,60+Math.floor(i/5)*120]);
+s.innerHTML='<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#14213d"/></marker></defs>'+m.edges.map(e=>pos[e.source]&&pos[e.target]?`<line x1="${pos[e.source][0]+60}" y1="${pos[e.source][1]}" x2="${pos[e.target][0]-60}" y2="${pos[e.target][1]}" stroke="#14213d" marker-end="url(#ar)"/>`:'').join('')+
+m.nodes.map(n=>`<g class="node" onclick="ask('Explain ${esc(n.id).replace(/'/g,'')}');go('tutor')" transform="translate(${pos[n.id][0]-60},${pos[n.id][1]-20})"><rect width="120" height="40" rx="8" fill="${col(n.mastery)}" stroke="#14213d" stroke-width="2"/><text x="60" y="24" text-anchor="middle" fill="#fff">${esc(n.id.slice(0,16))}</text></g>`).join('')}
+init()
+</script></body></html>
